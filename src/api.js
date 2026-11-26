@@ -44,3 +44,35 @@ export const categoryName = (slug) =>
 
 export const FREE_SHIPPING_AT = 500;
 export const shippingFor = (subtotal) => (subtotal >= FREE_SHIPPING_AT || subtotal === 0 ? 0 : 49);
+
+// Category-bar links. DummyJSON has two categories, so "rooms" are keyword
+// searches over title + description (each verified to match real products).
+const shop = (params) => `/shop?${new URLSearchParams(params)}`;
+export const NAV = [
+  {
+    label: 'Furniture',
+    to: shop({ category: 'furniture' }),
+    children: [
+      { label: 'Bedroom', to: shop({ category: 'furniture', q: 'bedroom' }) },
+      { label: 'Living room', to: shop({ category: 'furniture', q: 'living room' }) },
+      { label: 'Office', to: shop({ category: 'furniture', q: 'office' }) },
+      { label: 'Bathroom', to: shop({ category: 'furniture', q: 'bathroom' }) },
+    ],
+  },
+  {
+    label: 'Home decor',
+    to: shop({ category: 'home-decoration' }),
+    children: [
+      { label: 'Lighting', to: shop({ category: 'home-decoration', q: 'lamp' }) },
+      { label: 'Plants', to: shop({ category: 'home-decoration', q: 'plant' }) },
+      { label: 'Photo frames', to: shop({ category: 'home-decoration', q: 'photo' }) },
+      { label: 'Swings', to: shop({ category: 'home-decoration', q: 'swing' }) },
+    ],
+  },
+  { label: 'Bedroom', to: shop({ q: 'bedroom' }) },
+  { label: 'Living room', to: shop({ q: 'living room' }) },
+  { label: 'Office', to: shop({ q: 'office' }) },
+  { label: 'Bathroom', to: shop({ q: 'bathroom' }) },
+  { label: 'Lighting', to: shop({ q: 'lamp' }) },
+  { label: 'Outlet', to: shop({ sort: 'discount' }) },
+];

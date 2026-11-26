@@ -1,111 +1,139 @@
 import { useState } from 'react';
-import { Link, useLocation } from 'react-router-dom';
-import { AnimatePresence, motion, useMotionValueEvent, useScroll } from 'motion/react';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useCart } from '../CartContext';
 import { useUI } from '../UIContext';
-import { EASE } from '../motion';
+import { useWishlist } from '../WishlistContext';
+import { NAV } from '../api';
+import { CartIcon, ChevronDown, ClockIcon, GlobeIcon, HeartIcon, SearchIcon, StarIcon, StoreIcon, UserIcon } from './Icons';
 
 export default function Header() {
-  const { count } = useCart();
-  const { cartTargetRef, bump, flying, drawerOpen, setDrawerOpen } = useUI();
+  return (
+    <>
+      <TopBar />
+      <header className="header">
+        <div className="container header__main">
+          <Logo />
+          <SearchBox />
+          <div className="header__pills">
+            <Link to="/shop?sort=discount" className="pill-btn"><StoreIcon size={18} /> Outlet</Link>
+            <Link to="/shop?sort=rating" className="pill-btn"><StarIcon size={18} /> Bestsellers</Link>
+          </div>
+          <HeaderActions />
+        </div>
+        <div className="container">
+          <CategoryBar />
+        </div>
+      </header>
+    </>
+  );
+}
+
+export function Logo({ light = false }) {
+  return (
+    <Link to="/" className={`logo ${light ? 'logo--light' : ''}`} aria-label="Hearth & Oak home">
+      hearth<span className="logo__amp">&amp;</span><span className="logo__oak">oak</span>
+    </Link>
+  );
+}
+
+function TopBar() {
+  return (
+    <div className="topbar">
+      <div className="container topbar__inner">
+        <span className="topbar__note">Free delivery &amp; assembly over $500</span>
+        <nav className="topbar__links">
+          <Link to="/#about">About us</Link>
+          <Link to="/#categories">Categories</Link>
+          <Link to="/shop">Products</Link>
+          <Link to="/shop?sort=discount">Deals</Link>
+          <Link to="/#contact">Contact</Link>
+        </nav>
+        <div className="topbar__meta">
+          <span><ClockIcon size={16} /> Mon–Sat 10:00–20:00</span>
+          <span><GlobeIcon size={16} /> EN</span>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function SearchBox() {
+  const navigate = useNavigate();
   const { pathname, search } = useLocation();
-  const category = new URLSearchParams(search).get('category');
+  const current = pathname === '/shop' ? new URLSearchParams(search).get('q') ?? '' : '';
+  const [q, setQ] = useState(current);
+  const [lastCurrent, setLastCurrent] = useState(current);
+  // Keep the box in sync when the URL's search term changes elsewhere.
+  if (current !== lastCurrent) {
+    setLastCurrent(current);
+    setQ(current);
+  }
 
-  // Hide on scroll down, reveal on scroll up.
-  const { scrollY } = useScroll();
-  const [hidden, setHidden] = useState(false);
-  const [scrolled, setScrolled] = useState(false);
-  useMotionValueEvent(scrollY, 'change', (y) => {
-    const prev = scrollY.getPrevious() ?? 0;
-    setHidden(y > prev && y > 160);
-    setScrolled(y > 10);
-  });
-
-  const onShop = pathname === '/shop';
-  const links = [
-    { to: '/', label: 'Home', active: pathname === '/' },
-    { to: '/shop', label: 'Shop all', active: onShop && !category },
-    { to: '/shop?category=furniture', label: 'Furniture', active: onShop && category === 'furniture' },
-    { to: '/shop?category=home-decoration', label: 'Decor', active: onShop && category === 'home-decoration' },
-  ];
-  const [hovered, setHovered] = useState(null);
-  const pillAt = hovered ?? links.findIndex((l) => l.active);
+  const submit = (e) => {
+    e.preventDefault();
+    const term = q.trim();
+    navigate(term ? `/shop?${new URLSearchParams({ q: term })}` : '/shop');
+  };
 
   return (
-    <motion.header
-      className={`header ${scrolled ? 'is-scrolled' : ''}`}
-      animate={{ y: hidden && !flying && !drawerOpen ? '-100%' : '0%' }}
-      transition={{ duration: 0.45, ease: EASE }}
-    >
-      <div className="container header__inner">
-        <Link to="/" className="logo">
-          Hearth <span>&amp;</span> Oak
-        </Link>
+    <form className="searchbox" onSubmit={submit} role="search">
+      <input type="search" value={q} onChange={(e) => setQ(e.target.value)} placeholder="Search products" aria-label="Search products" />
+      <button type="submit" aria-label="Search"><SearchIcon /></button>
+    </form>
+  );
+}
 
-        <nav className="nav" onPointerLeave={() => setHovered(null)}>
-          {links.map((l, i) => (
-            <Link
-              key={l.to}
-              to={l.to}
-              className={l.active ? 'is-active' : ''}
-              onPointerEnter={() => setHovered(i)}
-            >
-              {pillAt === i && (
-                <motion.span
-                  layoutId="nav-pill"
-                  className="nav__pill"
-                  transition={{ type: 'spring', stiffness: 420, damping: 34 }}
-                />
-              )}
-              <span className="nav__label">{l.label}</span>
-            </Link>
-          ))}
-        </nav>
+function HeaderActions() {
+  const { count } = useCart();
+  const { ids } = useWishlist();
+  const { setDrawerOpen } = useUI();
 
-        <motion.button
-          ref={cartTargetRef}
-          className="cart-link"
-          onClick={() => setDrawerOpen(true)}
-          whileTap={{ scale: 0.88 }}
-          aria-label={`Open cart, ${count} items`}
-        >
-          <motion.svg
-            key={bump}
-            width="22"
-            height="22"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="1.8"
-            initial={bump ? { rotate: 0 } : false}
-            animate={{ rotate: [0, -14, 12, -6, 0] }}
-            transition={{ duration: 0.6 }}
-          >
-            <path d="M6 7h12l-1 13H7L6 7Z" />
-            <path d="M9 7a3 3 0 0 1 6 0" />
-          </motion.svg>
-          <AnimatePresence>
-            {count > 0 && (
-              <motion.span
-                className="cart-badge"
-                initial={{ scale: 0 }}
-                animate={{ scale: 1 }}
-                exit={{ scale: 0 }}
-                transition={{ type: 'spring', stiffness: 500, damping: 22 }}
-              >
-                <motion.span
-                  key={`${bump}-${count}`}
-                  initial={{ scale: 1.9 }}
-                  animate={{ scale: 1 }}
-                  transition={{ type: 'spring', stiffness: 500, damping: 14 }}
-                >
-                  {count}
-                </motion.span>
-              </motion.span>
-            )}
-          </AnimatePresence>
-        </motion.button>
-      </div>
-    </motion.header>
+  return (
+    <div className="header__actions">
+      <Link to="/wishlist" className="action">
+        <span className="action__icon">
+          <HeartIcon size={22} />
+          {ids.length > 0 && <span className="badge-count">{ids.length}</span>}
+        </span>
+        <span className="action__label">Wishlist</span>
+      </Link>
+      <span className="action action--disabled" title="Accounts are not available in this demo">
+        <span className="action__icon"><UserIcon size={22} /></span>
+        <span className="action__label">Sign in</span>
+      </span>
+      <button className="cart-btn" onClick={() => setDrawerOpen(true)} aria-label={`Open cart, ${count} items`}>
+        <CartIcon size={22} />
+        {count > 0 && <span className="badge-count">{count}</span>}
+      </button>
+    </div>
+  );
+}
+
+function CategoryBar() {
+  const [open, setOpen] = useState(null);
+  const { pathname, search } = useLocation();
+  const here = pathname + search;
+
+  return (
+    <nav className="catbar" onMouseLeave={() => setOpen(null)}>
+      {NAV.map((item, i) => (
+        <div key={item.label} className="catbar__item" onMouseEnter={() => setOpen(item.children ? i : null)}>
+          <Link to={item.to} className={`catbar__link ${here === item.to ? 'is-active' : ''}`} onClick={() => setOpen(null)}>
+            {item.label}
+            {item.children && <ChevronDown />}
+          </Link>
+          {open === i && item.children && (
+            <div className="dropdown">
+              {item.children.map((c) => (
+                <Link key={c.label} to={c.to} onClick={() => setOpen(null)}>{c.label}</Link>
+              ))}
+              <Link to={item.to} className="dropdown__all" onClick={() => setOpen(null)}>
+                View all {item.label.toLowerCase()} →
+              </Link>
+            </div>
+          )}
+        </div>
+      ))}
+    </nav>
   );
 }
