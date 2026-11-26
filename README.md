@@ -18,8 +18,15 @@ The full list is at `https://dummyjson.com/products/category-list`.
 
 A static staging/test copy of the store that mirrors the page structure of
 [embawood.ge](https://embawood.ge) section by section. It keeps our own name ("Hearth & Oak"),
-DummyJSON product data and photos, and original placeholder copy; no Embawood logos, photos
+its own product data and photos, and original placeholder copy; no Embawood logos, photos
 or text are used.
+
+- **Products (29):** the 10 furniture/décor items from DummyJSON plus 19 local furniture items
+  in `src/catalog.js` (sofas, armchairs, beds, dining/coffee tables, a desk), merged in
+  `src/api.js`. Their photos are CC0 images from StockSnap (found via Openverse), stored in
+  `public/catalog/` — sources listed in `public/catalog/CREDITS.md`.
+- **Product types:** `/shop?type=sofas|chairs|beds|tables|lighting|decor` filters by product
+  tags; also available as a "Product type" box in the shop sidebar and in the category bar.
 
 - **No animation:** the `motion` library is removed and the stylesheet has no transitions or
   keyframes. Sliders don't autoplay and carousels page instantly, so screenshots and tests are deterministic.

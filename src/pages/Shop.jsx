@@ -1,6 +1,6 @@
 import { useMemo, useState } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
-import { CATEGORIES, categoryName, discounted, fetchAllProducts } from '../api';
+import { CATEGORIES, TYPES, categoryName, discounted, fetchAllProducts, hasType, typeName } from '../api';
 import { useAsync } from '../useAsync';
 import ProductCard from '../components/ProductCard';
 import { ChevronDown, ChevronUp, FilterIcon, SearchIcon } from '../components/Icons';
@@ -22,6 +22,7 @@ const STATUSES = [
 export default function Shop() {
   const [params, setParams] = useSearchParams();
   const categories = params.getAll('category');
+  const types = params.getAll('type');
   const brands = params.getAll('brand');
   const statuses = params.getAll('status');
   const q = params.get('q') ?? '';
@@ -58,20 +59,23 @@ export default function Shop() {
     const hi = max === '' ? Infinity : Number(max);
     return data
       .filter((p) => !categories.length || categories.includes(p.category))
+      .filter((p) => !types.length || types.some((t) => hasType(p, t)))
       .filter((p) => !brands.length || brands.includes(p.brand))
       .filter((p) => statuses.every((s) => STATUSES.find((x) => x.value === s)?.test(p) ?? true))
       .filter((p) => discounted(p) >= lo && discounted(p) <= hi)
       .filter((p) => !needle || `${p.title} ${p.description} ${p.brand ?? ''}`.toLowerCase().includes(needle))
       .sort(SORTS[sort].fn);
-  }, [data, categories, brands, statuses, q, min, max, sort]);
+  }, [data, categories, types, brands, statuses, q, min, max, sort]);
 
   const title = q.trim()
     ? `Results for “${q.trim()}”`
     : sort === 'discount'
       ? 'Outlet'
-      : categories.length === 1
-        ? categoryName(categories[0])
-        : 'Products';
+      : types.length === 1
+        ? typeName(types[0])
+        : categories.length === 1
+          ? categoryName(categories[0])
+          : 'Products';
 
   return (
     <>
@@ -97,6 +101,15 @@ export default function Shop() {
               <label key={c.slug} className="check">
                 <input type="checkbox" checked={categories.includes(c.slug)} onChange={() => toggleMany('category', c.slug)} />
                 {c.name}
+              </label>
+            ))}
+          </FilterBox>
+
+          <FilterBox title="Product type" defaultOpen={types.length > 0}>
+            {TYPES.map((t) => (
+              <label key={t.slug} className="check">
+                <input type="checkbox" checked={types.includes(t.slug)} onChange={() => toggleMany('type', t.slug)} />
+                {t.name}
               </label>
             ))}
           </FilterBox>

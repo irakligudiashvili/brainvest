@@ -11,14 +11,14 @@ import { ErrorState, SkeletonGrid } from '../components/Status';
 
 // All copy on this page is original placeholder text for the staging mockup.
 const ROOMS = [
-  { label: 'Bedroom furniture', q: 'bedroom', pick: 'bed' },
-  { label: 'Living room', q: 'living room', pick: 'sofa' },
-  { label: 'Office chairs', q: 'office', pick: 'chair' },
-  { label: 'Bedside tables', q: 'bedside', pick: 'bedside' },
-  { label: 'Bathroom', q: 'bathroom', pick: 'sink' },
-  { label: 'Lighting', q: 'lamp', pick: 'lamp' },
-  { label: 'Plants & pots', q: 'plant', pick: 'plant pot' },
-  { label: 'Photo frames', q: 'photo', pick: 'frame' },
+  { label: 'Sofas & couches', to: '/shop?type=sofas', pick: 'sofa' },
+  { label: 'Armchairs & chairs', to: '/shop?type=chairs', pick: 'chair' },
+  { label: 'Beds', to: '/shop?type=beds', pick: 'bed' },
+  { label: 'Tables & desks', to: '/shop?type=tables', pick: 'bedside' },
+  { label: 'Bathroom', to: '/shop?q=bathroom', pick: 'sink' },
+  { label: 'Lighting', to: '/shop?type=lighting', pick: 'lamp' },
+  { label: 'Plants & pots', to: '/shop?q=plant', pick: 'plant pot' },
+  { label: 'Photo frames', to: '/shop?q=photo', pick: 'frame' },
 ];
 
 const FEATURES = [
@@ -79,7 +79,7 @@ export default function Home() {
           {ROOMS.map((r) => {
             const img = find(r.pick)?.thumbnail;
             return (
-              <Link key={r.label} to={`/shop?q=${encodeURIComponent(r.q)}`} className="cat-tile">
+              <Link key={r.label} to={r.to} className="cat-tile">
                 <div className="cat-tile__media">{img && <img src={img} alt="" loading="lazy" />}</div>
                 <h3>{r.label}</h3>
                 <span className="more-link">Details <ArrowRight size={16} /></span>

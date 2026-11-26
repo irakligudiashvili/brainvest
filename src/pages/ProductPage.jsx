@@ -63,7 +63,7 @@ function ProductDetail({ id }) {
         <div className="product__info">
           {p.brand && <div className="eyebrow">{p.brand}</div>}
           <h1 className="product__title">{p.title}</h1>
-          <Rating value={p.rating} count={p.reviews?.length} />
+          <Rating value={p.rating} count={p.reviews?.length || undefined} />
           <div className="price price--lg">
             {sale && <s>{money(p.price)}</s>}
             <strong>{money(discounted(p))}</strong>

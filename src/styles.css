@@ -429,3 +429,11 @@ main { min-height: 60vh; }
   .footer__grid { grid-template-columns: 1fr; gap: 2rem; }
   .chat-fab { width: 52px; height: 52px; bottom: 24px; }
 }
+
+/* ───────────── Catalogue photos ─────────────
+   Local catalogue items are room photos (not white-background cut-outs),
+   so they fill their frame instead of being contained with padding. */
+img[src*="/catalog/"] { object-fit: cover; mix-blend-mode: normal; padding: 0; background: var(--gray); }
+.pcard__media:has(img[src*="/catalog/"]) { padding: 0; }
+.pcard:has(img[src*="/catalog/"]) .pcard__heart { background: #fff; border-radius: 50%; padding: 0.45rem; box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15); }
+.deal__media img[src*="/catalog/"] { height: 240px; border-radius: 0 28px 28px 28px; }
