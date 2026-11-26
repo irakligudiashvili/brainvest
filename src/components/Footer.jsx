@@ -8,7 +8,7 @@ export default function Footer() {
         <div className="footer__brand">
           <Logo light />
           <p>
-            Hearth &amp; Oak brings well-made, comfortable furniture to every room — practical design,
+            Embawood brings well-made, comfortable furniture to every room — practical design,
             honest materials and pieces built to be lived with.
           </p>
         </div>
@@ -34,7 +34,7 @@ export default function Footer() {
         </div>
       </div>
       <div className="container footer__bottom">
-        <span>All rights reserved · Hearth &amp; Oak © 2026</span>
+        <span>All rights reserved · Embawood © 2026</span>
         <span>
           Product data &amp; images from{' '}
           <a href="https://dummyjson.com" target="_blank" rel="noreferrer">DummyJSON</a>. Staging mockup — no real orders.

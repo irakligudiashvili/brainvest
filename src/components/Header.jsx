@@ -30,8 +30,8 @@ export default function Header() {
 
 export function Logo({ light = false }) {
   return (
-    <Link to="/" className={`logo ${light ? 'logo--light' : ''}`} aria-label="Hearth & Oak home">
-      hearth<span className="logo__amp">&amp;</span><span className="logo__oak">oak</span>
+    <Link to="/" className={`logo ${light ? 'logo--light' : ''}`} aria-label="Embawood home">
+      Emba<span className="logo__amp"></span><span className="logo__oak">wood</span>
     </Link>
   );
 }
