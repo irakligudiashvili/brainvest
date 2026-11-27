@@ -31,6 +31,8 @@ export default function Shop() {
   const sort = SORTS[params.get('sort')] ? params.get('sort') : 'featured';
 
   const { data, error, loading } = useAsync(fetchAllProducts, []);
+  const [filtersOpen, setFiltersOpen] = useState(false);
+  const activeFilters = [...params.keys()].filter((k) => k !== 'sort').length;
 
   const setOne = (key, value) => {
     const next = new URLSearchParams(params);
@@ -89,7 +91,13 @@ export default function Shop() {
       </div>
 
       <div className="container shop">
-        <aside className="filters">
+        {/* Shown only on small screens, where the filter column collapses. */}
+        <button type="button" className="filters-toggle" onClick={() => setFiltersOpen(!filtersOpen)} aria-expanded={filtersOpen}>
+          <FilterIcon size={18} /> {filtersOpen ? 'Hide filters' : 'Show filters'}
+          {activeFilters > 0 && <span className="filters-toggle__count">{activeFilters}</span>}
+          {filtersOpen ? <ChevronUp /> : <ChevronDown />}
+        </button>
+        <aside className={`filters ${filtersOpen ? 'is-open' : ''}`}>
           <h2 className="filters__title"><FilterIcon size={20} /> Filter</h2>
           <div className="filters__search">
             <input className="input" type="search" placeholder="Search" value={q} onChange={(e) => setOne('q', e.target.value)} aria-label="Search products" />
@@ -139,7 +147,7 @@ export default function Shop() {
             </div>
           </FilterBox>
 
-          {[...params.keys()].some((k) => k !== 'sort') && (
+          {activeFilters > 0 && (
             <button type="button" className="link" onClick={() => setParams(sort === 'featured' ? {} : { sort }, { replace: true })}>
               Clear all filters
             </button>

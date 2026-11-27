@@ -1,17 +1,23 @@
-import { useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useCart } from '../CartContext';
 import { useUI } from '../UIContext';
 import { useWishlist } from '../WishlistContext';
 import { NAV } from '../api';
-import { CartIcon, ChevronDown, ClockIcon, GlobeIcon, HeartIcon, SearchIcon, StarIcon, StoreIcon, UserIcon } from './Icons';
+import { CartIcon, ChevronDown, ChevronUp, ClockIcon, CloseIcon, MenuIcon, GlobeIcon, HeartIcon, SearchIcon, StarIcon, StoreIcon, UserIcon } from './Icons';
 
 export default function Header() {
+  const [menuOpen, setMenuOpen] = useState(false);
+  const closeMenu = useCallback(() => setMenuOpen(false), []);
   return (
     <>
       <TopBar />
       <header className="header">
         <div className="container header__main">
+          {/* Hamburger: shown only on small screens, where the category bar is hidden. */}
+          <button type="button" className="menu-btn" onClick={() => setMenuOpen(true)} aria-label="Open menu" aria-expanded={menuOpen}>
+            <MenuIcon size={24} />
+          </button>
           <Logo />
           <SearchBox />
           <div className="header__pills">
@@ -24,6 +30,82 @@ export default function Header() {
           <CategoryBar />
         </div>
       </header>
+      <MobileMenu open={menuOpen} onClose={closeMenu} />
+    </>
+  );
+}
+
+const EXTRA_LINKS = [
+  { label: 'Bestsellers', to: '/shop?sort=rating' },
+  { label: 'All products', to: '/shop' },
+  { label: 'About us', to: '/#about' },
+  { label: 'Contact', to: '/#contact' },
+  { label: 'Wishlist', to: '/wishlist' },
+];
+
+/** Slide-in navigation for small screens: the category bar's links, with sub-menus as accordions. */
+function MobileMenu({ open, onClose }) {
+  const [expanded, setExpanded] = useState(null);
+  const { pathname, search, hash } = useLocation();
+
+  // Close whenever the route changes.
+  useEffect(() => {
+    onClose();
+  }, [pathname, search, hash, onClose]);
+
+  // Esc to close + lock page scroll while open.
+  useEffect(() => {
+    if (!open) return;
+    const onKey = (e) => e.key === 'Escape' && onClose();
+    window.addEventListener('keydown', onKey);
+    document.body.style.overflow = 'hidden';
+    return () => {
+      window.removeEventListener('keydown', onKey);
+      document.body.style.overflow = '';
+    };
+  }, [open, onClose]);
+
+  if (!open) return null;
+
+  return (
+    <>
+      <div className="drawer-backdrop" onClick={onClose} />
+      <nav className="mnav" aria-label="Main menu">
+        <div className="mnav__head">
+          <Logo />
+          <button type="button" className="icon-btn" onClick={onClose} aria-label="Close menu"><CloseIcon size={20} /></button>
+        </div>
+        <ul className="mnav__list">
+          {NAV.map((item, i) => (
+            <li key={item.label} className="mnav__item">
+              <div className="mnav__row">
+                <Link to={item.to} className="mnav__link" onClick={onClose}>{item.label}</Link>
+                {item.children && (
+                  <button type="button" className="mnav__toggle" onClick={() => setExpanded(expanded === i ? null : i)} aria-expanded={expanded === i} aria-label={`Show ${item.label} sections`}>
+                    {expanded === i ? <ChevronUp size={18} /> : <ChevronDown size={18} />}
+                  </button>
+                )}
+              </div>
+              {expanded === i && item.children && (
+                <ul className="mnav__sub">
+                  {item.children.map((c) => (
+                    <li key={c.label}><Link to={c.to} onClick={onClose}>{c.label}</Link></li>
+                  ))}
+                </ul>
+              )}
+            </li>
+          ))}
+        </ul>
+        <ul className="mnav__extra">
+          {EXTRA_LINKS.map((l) => (
+            <li key={l.label}><Link to={l.to} onClick={onClose}>{l.label}</Link></li>
+          ))}
+        </ul>
+        <div className="mnav__foot">
+          <span><ClockIcon size={16} /> Mon–Sat 10:00–20:00</span>
+          <span>Free delivery &amp; assembly over $500</span>
+        </div>
+      </nav>
     </>
   );
 }

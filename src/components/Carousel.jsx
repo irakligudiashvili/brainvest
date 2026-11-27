@@ -45,11 +45,10 @@ export default function Carousel({ children, controls = 'dots', className = '', 
       <div className="carousel__track" ref={ref}>{children}</div>
       {pages > 1 && (
         <div className="carousel__controls">
-          {showArrows && (
-            <button type="button" className="round-btn" onClick={() => go(page - 1)} disabled={page === 0} aria-label="Previous">
-              <ChevronLeft />
-            </button>
-          )}
+          {/* Arrows always render; when this carousel uses dots, they are shown on small screens only. */}
+          <button type="button" className={`round-btn ${showArrows ? '' : 'carousel__arrow--mobile'}`} onClick={() => go(page - 1)} disabled={page === 0} aria-label="Previous">
+            <ChevronLeft />
+          </button>
           {showDots && (
             <div className="dots">
               {Array.from({ length: pages }, (_, i) => (
@@ -57,11 +56,10 @@ export default function Carousel({ children, controls = 'dots', className = '', 
               ))}
             </div>
           )}
-          {showArrows && (
-            <button type="button" className="round-btn" onClick={() => go(page + 1)} disabled={page >= pages - 1} aria-label="Next">
-              <ChevronRight />
-            </button>
-          )}
+          <span className="carousel__count" aria-live="polite">{page + 1} / {pages}</span>
+          <button type="button" className={`round-btn ${showArrows ? '' : 'carousel__arrow--mobile'}`} onClick={() => go(page + 1)} disabled={page >= pages - 1} aria-label="Next">
+            <ChevronRight />
+          </button>
         </div>
       )}
     </div>
