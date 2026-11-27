@@ -14,37 +14,40 @@ It's free, needs no API key, and has CORS enabled, so no backend is required. Th
 The API calls live in `src/api.js`. To add categories, add them to `CATEGORIES` there.
 The full list is at `https://dummyjson.com/products/category-list`.
 
+## This branch: `embawood-style`
+
+A static staging/test copy of the store that mirrors the page structure of
+[embawood.ge](https://embawood.ge) section by section. It keeps our own name ("Hearth & Oak"),
+its own product data and photos, and original placeholder copy; no Embawood logos, photos
+or text are used.
+
+- **Products (29):** the 10 furniture/décor items from DummyJSON plus 19 local furniture items
+  in `src/catalog.js` (sofas, armchairs, beds, dining/coffee tables, a desk), merged in
+  `src/api.js`. Their photos are CC0 images from StockSnap (found via Openverse), stored in
+  `public/catalog/` — sources listed in `public/catalog/CREDITS.md`.
+- **Product types:** `/shop?type=sofas|chairs|beds|tables|lighting|decor` filters by product
+  tags; also available as a "Product type" box in the shop sidebar and in the category bar.
+
+- **No animation:** the `motion` library is removed and the stylesheet has no transitions or
+  keyframes. Sliders don't autoplay and carousels page instantly, so screenshots and tests are deterministic.
+- **Look:** Montserrat, lime `#8CC63F` + dark green `#00703C`, pill buttons and search,
+  cards with one square corner (`0 60px 60px 60px`), dark footer with a rounded corner
+- **Header:** gradient top bar, logo + search + Outlet/Bestsellers + wishlist/sign-in/cart,
+  and a lime category bar with dropdowns (`NAV` in `src/api.js`)
+- **Home, in order:** hero slider → intro → category carousel → bestsellers → 4 feature
+  cards → about mosaic → new arrivals → Top 10 deals → most viewed → banner →
+  "Why choose us" cards → blog → showrooms → footer, plus a (non-functional) chat button
+- **Products page (`/shop`):** title banner with breadcrumb, sidebar filters (search,
+  categories, brands, status, min/max price) and a 3-column grid. Every filter lives in
+  the URL, e.g. `/shop?category=furniture&brand=Knoll&max=500`.
+
 ## Features
 
-- Home page with hero, category tiles, a sideways product showcase, an editorial section, stats, and top-rated products
-- Shop page with category filters, search, and sorting, all kept in the URL
-- Product page with zoomable gallery, specs and delivery accordions, reviews, and related products
-- Cart stored in `localStorage`, with a slide-out drawer and a free-delivery progress bar
-- Mock checkout form and order confirmation (no payment is collected)
-- Responsive layout
-
-## Motion
-
-Built with [Motion](https://motion.dev) (`motion/react`). The shared pieces are in `src/components/`:
-
-| Effect | Where |
-| --- | --- |
-| Intro loader + curtain wipe (first visit per session) | `Intro.jsx` |
-| Masked word-by-word headline reveals (`*word*` = italic accent) | `SplitText.jsx` |
-| Fade-up when scrolled into view | `Reveal.jsx` |
-| Arch-shaped hero image, scroll parallax, rotating badge, floating card | `home/Hero.jsx`, `RotatingBadge.jsx` |
-| Ticker that tilts with scroll speed | `Marquee.jsx` |
-| Pinned section that scrolls products sideways | `home/Showcase.jsx` |
-| Image wipe-in + parallax | `ParallaxImage.jsx` |
-| Count-up stats, animated cart totals | `Numbers.jsx` |
-| 3D tilt + light sheen on product cards | `ProductCard.jsx` |
-| Product image flies into the cart, badge bounces | `UIContext.jsx`, `Header.jsx` |
-| Buttons that pull toward the cursor, custom cursor | `Magnetic.jsx`, `Cursor.jsx` |
-| Page transitions, sliding nav/filter pills, filter reshuffling | `Page.jsx`, `Header.jsx`, `pages/Shop.jsx` |
-| Self-drawing checkmark + confetti | `pages/Checkout.jsx` |
-
-All animation respects the OS "reduce motion" setting (`MotionConfig reducedMotion="user"`),
-and the intro is skipped for users who have it turned on.
+- Product page with gallery, specs and delivery accordions, reviews, and related products
+- Wishlist (hearts on cards, `/wishlist`) and cart, both stored in `localStorage`
+- Cart drawer with a free-delivery progress bar
+- Mock checkout and order confirmation (no payment is collected)
+- Responsive down to phone widths
 
 ## Run it
 
