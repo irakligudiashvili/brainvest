@@ -187,7 +187,7 @@ export default function Home() {
       </section>
 
       <section className="container section">
-        <h2 className="title-xl upper center-text">Why choose <span className="accent">Embawood</span></h2>
+        <h2 className="title-xl upper center-text">Why choose <span className="accent">Ebawood</span></h2>
         <Carousel controls="arrows" label="Why choose us" className="carousel--reasons">
           {REASONS.map((r) => (
             <div key={r.title} className="reason">

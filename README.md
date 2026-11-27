@@ -14,11 +14,11 @@ It's free, needs no API key, and has CORS enabled, so no backend is required. Th
 The API calls live in `src/api.js`. To add categories, add them to `CATEGORIES` there.
 The full list is at `https://dummyjson.com/products/category-list`.
 
-## This branch: `embawood-style`
+## This branch: `ebawood-style`
 
 A static staging/test copy of the store that mirrors the page structure of
-[embawood.ge](https://embawood.ge) section by section. It keeps our own name ("Hearth & Oak"),
-its own product data and photos, and original placeholder copy; no Embawood logos, photos
+[ebawood.ge](https://ebawood.ge) section by section. It keeps our own name ("Hearth & Oak"),
+its own product data and photos, and original placeholder copy; no Ebawood logos, photos
 or text are used.
 
 - **Products (29):** the 10 furniture/décor items from DummyJSON plus 19 local furniture items

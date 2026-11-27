@@ -7,7 +7,7 @@ const img = (file) => `${import.meta.env.BASE_URL}catalog/${file}.jpg`;
 
 const DEFAULTS = {
   category: 'furniture',
-  brand: 'Embawood',
+  brand: 'Ebawood',
   warrantyInformation: '10 year frame warranty',
   shippingInformation: 'Delivered and assembled in 1–2 weeks',
   returnPolicy: '30 days return policy',
