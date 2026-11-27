@@ -1,0 +1,33 @@
+# Python
+.venv/
+__pycache__/
+*.pyc
+.pytest_cache/
+*.egg-info/
+
+# macOS
+.DS_Store
+
+# Room scans, projects and processing outputs (personal, large) - kept on this Mac only
+data/
+projects/
+my_room/
+output/
+out/
+work/
+*.avjp
+*.blend
+*.blend1
+rdzis_saxli.obj
+rdzis_saxli.mtl
+
+# Furniture models (large, licences vary): only the catalog README is versioned
+assets/
+catalog/*
+!catalog/README.md
+
+# Built helper binary (compiled on first `run --backend apple`)
+tools/object_capture
+
+# Local Claude Code settings
+.claude/settings.local.json

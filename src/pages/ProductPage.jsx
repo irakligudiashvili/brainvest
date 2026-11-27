@@ -5,6 +5,7 @@ import { useAsync } from '../useAsync';
 import AddToCart from '../components/AddToCart';
 import HeartButton from '../components/HeartButton';
 import ProductCard from '../components/ProductCard';
+import ViewIn3D from '../components/ViewIn3D';
 import Rating from '../components/Rating';
 import { ChevronDown, ChevronUp } from '../components/Icons';
 import { ErrorState, Loading } from '../components/Status';
@@ -81,6 +82,8 @@ function ProductDetail({ id }) {
             <AddToCart product={p} qty={qty} label={`Add to cart · ${money(discounted(p) * qty)}`} className="btn--lg btn--grow" />
             <HeartButton id={p.id} className="heart--boxed" />
           </div>
+
+          <ViewIn3D product={p} />
 
           <Accordion sections={[{ title: 'Specifications', rows: specs }, { title: 'Delivery & returns', rows: delivery }].filter((s) => s.rows.length)} />
         </div>

@@ -1,0 +1,16 @@
+[project]
+name = "avegeany"
+version = "0.1.0"
+description = "Photogrammetry room scan -> RANSAC walls/floor/ceiling -> separate, movable furniture"
+requires-python = ">=3.10"
+dependencies = ["numpy>=1.24", "scipy>=1.10", "trimesh>=4.0"]
+
+[project.optional-dependencies]
+synthetic = ["open3d>=0.18"]
+test = ["pytest"]
+
+[project.scripts]
+avegeany = "avegeany.cli:main"
+
+[tool.setuptools]
+packages = ["avegeany"]

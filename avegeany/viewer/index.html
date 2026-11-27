@@ -1,0 +1,282 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>avegeany · room furniture editor</title>
+<link rel="icon" href="data:,">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<style>
+  :root { --bg:#14161a; --panel:#1d2026; --line:#2c3038; --text:#e6e6e6; --dim:#8b919c; --acc:#f2a541; --bad:#e5484d; }
+  * { box-sizing: border-box; }
+  html, body { margin:0; height:100%; background:var(--bg); color:var(--text);
+               font: 13px/1.4 -apple-system, BlinkMacSystemFont, "Segoe UI", Inter, sans-serif; }
+  #app { display:grid; grid-template-columns: 1fr 310px; height:100%; }
+  #view { position:relative; overflow:hidden; }
+  canvas { display:block; }
+  aside { background:var(--panel); border-left:1px solid var(--line); padding:14px; overflow-y:auto; }
+  h1 { font-size:15px; margin:0 0 2px; letter-spacing:.02em; }
+  h2 { font-size:11px; text-transform:uppercase; letter-spacing:.08em; color:var(--dim); margin:18px 0 8px; }
+  .sub { color:var(--dim); font-size:12px; }
+  ul { list-style:none; margin:0; padding:0; max-height:300px; overflow-y:auto; }
+  li { padding:4px 4px 4px 8px; border-radius:6px; cursor:pointer; display:flex; align-items:center; gap:8px; }
+  li .name { flex:1; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+  li:hover { background:#262a31; }
+  li.sel { background:#3a2f1c; color:var(--acc); }
+  li.hidden .name { color:var(--dim); text-decoration:line-through; }
+  li .dim { color:var(--dim); font-variant-numeric: tabular-nums; font-size:12px; }
+  li .eye { background:none; border:none; padding:2px 6px; color:var(--dim); font-size:13px; }
+  li .eye:hover { color:var(--text); }
+  label.row { display:flex; align-items:center; gap:8px; margin:6px 0; cursor:pointer; }
+  input[type=range] { width:100%; accent-color:var(--acc); }
+  input[type=number], select { width:100%; background:#15171b; color:var(--text); border:1px solid var(--line);
+           border-radius:5px; padding:4px 6px; font:inherit; font-variant-numeric: tabular-nums; }
+  .btns { display:grid; grid-template-columns:1fr 1fr; gap:6px; }
+  .btns3 { display:grid; grid-template-columns:1fr 1fr 1fr; gap:6px; margin-top:8px; }
+  .grid3 { display:grid; grid-template-columns:1fr 1fr 1fr; gap:6px; margin-top:6px; }
+  .grid3 label { color:var(--dim); font-size:11px; }
+  .grid2 { display:grid; grid-template-columns:1fr 1fr; gap:6px; margin-bottom:6px; }
+  .grid2 label { color:var(--dim); font-size:11px; }
+  button { background:#2a2e36; color:var(--text); border:1px solid var(--line); border-radius:6px;
+           padding:7px 8px; cursor:pointer; font:inherit; }
+  button:hover { border-color:var(--acc); }
+  button.primary { background:var(--acc); color:#1b1408; border-color:var(--acc); font-weight:600; }
+  button.danger:hover { border-color:var(--bad); color:#ffb4b6; }
+  button kbd { margin-left:2px; }
+  #sel { background:#15171b; border:1px solid var(--line); border-radius:8px; padding:10px; min-height:58px; }
+  .selhead { display:flex; justify-content:space-between; align-items:baseline; }
+  #sel b { color:var(--acc); }
+  #hud { position:absolute; left:12px; bottom:12px; color:var(--dim); font-size:12px; max-width:calc(100% - 24px);
+         background:rgba(20,22,26,.85); padding:8px 10px; border-radius:8px; pointer-events:none; line-height:1.7; }
+  #legend { position:absolute; right:12px; top:12px; font-size:12px; background:rgba(20,22,26,.85);
+            padding:8px 10px; border-radius:8px; pointer-events:none; line-height:1.6; }
+  .sw { display:inline-block; width:10px; height:10px; border-radius:2px; margin-right:5px; vertical-align:-1px; }
+  #msg { position:fixed; left:calc(50% - 155px); top:14px; transform:translateX(-50%); background:var(--panel);
+         border:1px solid var(--line); padding:8px 14px; border-radius:8px; display:none; z-index:30; }
+  .splitrow { display:grid; grid-template-columns:34px 1fr 34px auto; gap:6px; margin-top:10px; }
+  .splitrow button { padding:5px 0; }
+  .splitrow #spAuto { padding:5px 10px; }
+  button.toggle { width:100%; margin-top:6px; text-align:left; display:flex; align-items:center; gap:6px; }
+  button.toggle b { color:#7fd18b; flex:1; }
+  button.toggle.off { border-color:var(--bad); background:#2a1d1f; }
+  button.toggle.off b { color:#ffb4b6; }
+  button:disabled { opacity:.45; cursor:default; border-color:var(--line); }
+  #project { background:#15171b; border:1px solid var(--line); border-radius:8px; padding:10px; margin-top:12px; }
+  #projHead { display:flex; align-items:center; gap:6px; font-weight:600; }
+  #projName { overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+  #projDirty { width:8px; height:8px; border-radius:50%; background:var(--acc); flex:none; }
+  #projPath { color:var(--dim); font-size:12px; margin:2px 0 8px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+  #modal { position:fixed; inset:0; background:rgba(8,9,11,.72); display:flex; align-items:center;
+           justify-content:center; z-index:20; padding:16px; }
+  #modal[hidden] { display:none; }
+  #modalBox { position:relative; background:var(--panel); border:1px solid var(--line); border-radius:12px;
+              padding:20px 22px; width:min(520px, 100%); max-height:calc(100vh - 32px); overflow-y:auto; }
+  #modalBox h1 { font-size:18px; margin-bottom:6px; }
+  #modalBox .x { position:absolute; right:10px; top:10px; background:none; border:none; font-size:20px; color:var(--dim); padding:2px 8px; }
+  #modalBox .x:hover { color:var(--text); }
+  #modalBox .grid2 { margin-top:10px; }
+  #modalBox .grid2 label { display:flex; flex-direction:column; gap:3px; }
+  input[type=text] { width:100%; background:#15171b; color:var(--text); border:1px solid var(--line);
+           border-radius:5px; padding:4px 6px; font:inherit; }
+  .drop { border:1.5px dashed var(--line); border-radius:10px; padding:22px 12px; text-align:center; color:var(--dim); margin:12px 0 8px; }
+  .drop.on { border-color:var(--acc); color:var(--text); background:#221d14; }
+  .drop a, #modalBox a { color:var(--acc); }
+  ul.files, ul.recent { max-height:180px; }
+  ul.recent li { padding:7px 8px; }
+  #scanLog { background:#0f1114; border:1px solid var(--line); border-radius:8px; padding:8px 10px; margin:10px 0 0;
+             max-height:220px; overflow:auto; font-size:11px; line-height:1.45; white-space:pre-wrap; color:#c9ccd2; }
+  #msg.bad { border-color:var(--bad); color:#ffb4b6; }
+  #msg a { color:var(--acc); }
+  kbd { background:#2a2e36; border:1px solid var(--line); border-radius:4px; padding:0 4px; font-size:11px; }
+  code { font-size:12px; }
+
+  /* ---- left floating sidebar (Catalog | Split) ---- */
+  #leftbar { position:absolute; left:12px; top:12px; bottom:12px; width:300px; z-index:6; display:flex; flex-direction:column;
+             background:rgba(29,32,38,.94); border:1px solid var(--line); border-radius:12px; backdrop-filter:blur(6px);
+             box-shadow:0 8px 30px rgba(0,0,0,.35); overflow:hidden; }
+  #leftbar.collapsed { width:44px; }
+  #leftbar .tabs { display:flex; align-items:center; gap:4px; padding:6px; border-bottom:1px solid var(--line); flex:none; }
+  #leftbar.collapsed .tabs { flex-direction:column; border-bottom:none; }
+  #leftbar .tab { flex:1; background:none; border:1px solid transparent; padding:6px 8px; border-radius:7px; color:var(--dim);
+                  display:flex; align-items:center; gap:6px; justify-content:center; }
+  #leftbar .tab:hover { color:var(--text); border-color:var(--line); }
+  #leftbar .tab.on { background:#2a2e36; color:var(--text); border-color:var(--line); }
+  #leftbar .tab .ico { font-size:15px; line-height:1; }
+  #leftbar.collapsed .tab { flex:none; width:32px; height:32px; padding:0; }
+  #leftbar.collapsed .tab .lbl, #leftbar.collapsed .pane { display:none !important; }
+  #lbToggle { background:none; border:none; color:var(--dim); padding:4px 8px; flex:none; }
+  #lbToggle:hover { color:var(--text); }
+  #leftbar .pane { flex:1; overflow-y:auto; padding:12px; }
+  #leftbar .pane[hidden] { display:none; }
+  #leftbar h2:first-child { margin-top:0; }
+  #view.lb-open #hud { left:324px; max-width:calc(100% - 336px); }
+  #view.lb-closed #hud { left:68px; max-width:calc(100% - 80px); }
+  @media (max-width: 1180px) { #view.lb-open #hud { display:none; } }   /* no room next to the open sidebar */
+
+  /* catalog */
+  .chips { display:flex; flex-wrap:wrap; gap:5px; margin:8px 0; }
+  .chip { padding:3px 9px; border-radius:999px; font-size:12px; background:#23262d; border:1px solid var(--line); color:var(--dim); }
+  .chip.on { background:#3a2f1c; color:var(--acc); border-color:#5c4520; }
+  .cgrid { display:grid; grid-template-columns:1fr 1fr; gap:8px; }
+  .card { position:relative; background:#15171b; border:1px solid var(--line); border-radius:9px; padding:6px; cursor:grab;
+          user-select:none; }
+  .card:hover { border-color:var(--acc); }
+  .card:active { cursor:grabbing; }
+  .card .thumb { width:100%; aspect-ratio:1; border-radius:6px; background:#0f1114 center/contain no-repeat;
+                 display:flex; align-items:center; justify-content:center; color:#4a505b; font-size:11px; }
+  .card .cname { font-size:12px; margin-top:5px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+  .card .csize { font-size:11px; color:var(--dim); font-variant-numeric:tabular-nums; }
+  .card .src { position:absolute; left:10px; top:10px; font-size:10px; padding:1px 5px; border-radius:4px;
+               background:rgba(20,22,26,.8); color:var(--dim); }
+  .card .rm { position:absolute; right:6px; top:6px; background:rgba(20,22,26,.85); border:none; color:var(--dim);
+              width:22px; height:22px; padding:0; border-radius:5px; display:none; }
+  .card:hover .rm { display:block; }
+  .card .rm:hover { color:#ffb4b6; }
+  .empty { color:var(--dim); font-size:12px; padding:10px 2px; line-height:1.5; }
+  details.box { background:#15171b; border:1px solid var(--line); border-radius:8px; padding:8px 10px; margin-top:10px; }
+  details.box summary { cursor:pointer; color:var(--text); }
+  details.box[open] summary { margin-bottom:8px; }
+
+  /* split tab */
+  .seg { display:grid; grid-template-columns:1fr 1fr; background:#15171b; border:1px solid var(--line); border-radius:8px; padding:3px; gap:3px; }
+  .seg button { border:none; background:none; color:var(--dim); padding:6px; }
+  .seg button.on { background:#2a2e36; color:var(--text); }
+  .pieces li { padding:5px 6px; }
+  .pieces li.on { background:#2a2e36; outline:1px solid var(--acc); }
+  .swatch { width:14px; height:14px; border-radius:4px; flex:none; border:1px solid rgba(255,255,255,.15); }
+  .planes li { gap:6px; }
+  .planes input[type=number] { width:64px; }
+  .warn { color:#ffcf8a; font-size:12px; margin:6px 0; }
+  .focusbar { position:absolute; left:50%; top:14px; transform:translateX(-50%); z-index:7; background:rgba(29,32,38,.94);
+              border:1px solid var(--acc); border-radius:999px; padding:6px 14px; font-size:12px; display:none; }
+  .focusbar.on { display:block; }
+  #view.lb-open .focusbar { left:calc(50% + 156px); }
+
+  /* ui=none (embed option): only the 3D view */
+  body.ui-none #app { grid-template-columns: 1fr; }
+  body.ui-none aside, body.ui-none #leftbar, body.ui-none #legend, body.ui-none #hud { display:none !important; }
+  body.ui-none #msg { left:50%; }
+</style>
+<script type="importmap">
+{ "imports": {
+  "three": "./vendor/three/build/three.module.js",
+  "three/addons/": "./vendor/three/examples/jsm/"
+} }
+</script>
+</head>
+<body>
+<div id="app">
+  <div id="view" class="lb-open">
+    <div id="msg"></div>
+    <div id="focusBar" class="focusbar"></div>
+    <div id="leftbar">
+      <div class="tabs">
+        <button class="tab on" data-tab="catalog" title="Catalog — drag furniture onto the floor"><span class="ico">▦</span><span class="lbl">Catalog</span></button>
+        <button class="tab" data-tab="split" title="Split — separate an object into parts (S)"><span class="ico">✂</span><span class="lbl">Split</span></button>
+        <button id="lbToggle" title="collapse / expand ( [ )">‹</button>
+      </div>
+      <div class="pane" id="pane-catalog">
+        <input type="text" id="catSearch" placeholder="Search furniture…">
+        <div class="chips" id="catChips"></div>
+        <div class="cgrid" id="catGrid"></div>
+        <div class="empty" id="catEmpty" hidden></div>
+        <details class="box" id="catAdd">
+          <summary>+ Add to my library</summary>
+          <div id="catAddDrop" class="drop" style="margin:4px 0 8px">Drop a model here or <a href="#" id="catAddPick">choose…</a></div>
+          <input type="file" id="catAddFile" accept=".glb,.gltf,.obj,.ply,.stl" hidden>
+          <div class="sub" id="catAddChosen"></div>
+          <div class="grid2" style="margin-top:6px">
+            <label>name<input type="text" id="catAddName" placeholder="from file name"></label>
+            <label>category<input type="text" id="catAddCat" list="catCats" placeholder="e.g. chairs"></label>
+            <label>up axis<select id="catAddUp"><option value="">auto</option><option value="y">Y up</option><option value="z">Z up</option></select></label>
+            <label>units<select id="catAddUnit"><option value="1">metres</option><option value="0.01">centimetres</option>
+              <option value="0.001">millimetres</option><option value="0.0254">inches</option></select></label>
+          </div>
+          <datalist id="catCats"></datalist>
+          <button id="catAddGo" class="primary" style="width:100%" disabled>Save to my library</button>
+          <p class="sub" style="margin:6px 0 0">Library items appear in every project.</p>
+        </details>
+        <details class="box">
+          <summary>Import a file once</summary>
+          <div class="grid2">
+            <label>file up axis<select id="importUp">
+              <option value="auto">auto (glb/obj Y · stl/ply Z)</option><option value="y">Y up</option><option value="z">Z up</option></select></label>
+            <label>file units<select id="importUnit">
+              <option value="1">metres (original)</option><option value="0.01">centimetres</option>
+              <option value="0.001">millimetres</option><option value="0.0254">inches</option></select></label>
+          </div>
+          <button id="importBtn" style="width:100%">Import .glb / .obj / .ply / .stl…</button>
+          <input type="file" id="importFile" accept=".glb,.gltf,.obj,.ply,.stl,.bin,.png,.jpg,.jpeg,.webp" multiple hidden>
+          <p class="sub" style="margin:6px 0 0">Kept at original size; not added to the library. For a .gltf, select it together with its .bin and texture files.</p>
+        </details>
+        <p class="sub" id="catFolders" style="margin-top:10px"></p>
+      </div>
+      <div class="pane" id="pane-split" hidden></div>
+    </div>
+    <div id="legend">
+      <span class="sw" style="background:#e5484d"></span>X left/right ·
+      <span class="sw" style="background:#46a758"></span>Y up/down ·
+      <span class="sw" style="background:#3e8ef7"></span>Z front/back<br>
+      arrows move · green ring turns · <span class="sw" style="background:#f2c94c"></span>square: move on floor
+    </div>
+    <div id="hud">
+      <kbd>drag object</kbd> slide on floor · <kbd>drag gizmo</kbd> move / turn (<kbd>Shift</kbd> snaps 5 cm / 15°) ·
+      <kbd>Q</kbd>/<kbd>E</kbd> turn 15° · <kbd>←↑→↓</kbd> <kbd>PgUp</kbd>/<kbd>PgDn</kbd> nudge ·
+      <kbd>L</kbd> world/local axes · <kbd>C</kbd> collisions on/off · <kbd>H</kbd> hide · <kbd>⌫</kbd> delete · <kbd>⌘Z</kbd> undo · <kbd>⌘S</kbd> save ·
+      <kbd>F</kbd> focus · <kbd>S</kbd> split · <kbd>[</kbd> sidebar · <kbd>Esc</kbd> deselect<br>
+      drag empty space: orbit · right-drag: pan · wheel: zoom · drag furniture from the Catalog onto the floor · drop an .avjp to open it
+    </div>
+  </div>
+  <aside>
+    <h1>Room furniture editor</h1>
+    <div class="sub" id="roomInfo">loading…</div>
+
+    <div id="project">
+      <div id="projHead"><span id="projName">…</span><span id="projDirty" title="unsaved changes" hidden></span></div>
+      <div id="projPath"></div>
+      <div class="btns">
+        <button id="saveBtn" class="primary" title="⌘S / Ctrl+S">Save</button>
+        <button id="downloadBtn" title="download a copy of the project file">Download .avjp</button>
+        <button id="openBtn">Open…</button>
+        <button id="newScanBtn">New from scan…</button>
+      </div>
+    </div>
+
+    <h2>Selected</h2>
+    <div id="sel"><span class="sub">Click a piece of furniture.</span></div>
+
+    <h2>Gizmo</h2>
+    <div class="grid2">
+      <label>axes<select id="space"><option value="world">world (room)</option><option value="local">local (object)</option></select></label>
+      <label>&nbsp;<span class="row" style="margin:4px 0 0"><input type="checkbox" id="snap"> snap 5 cm / 15°</span></label>
+    </div>
+    <button id="collideBtn" class="toggle" title="C — when off, objects can pass through each other and the walls">
+      Collisions: <b id="collideState">on</b> <kbd>C</kbd></button>
+    <input type="checkbox" id="collide" checked hidden>
+
+    <h2>Objects</h2>
+    <ul id="list"></ul>
+
+    <h2>View</h2>
+    <label class="row"><input type="checkbox" id="showScan" checked> scanned room</label>
+    <label class="row"><input type="checkbox" id="showShell" checked> clean room shell (fills holes)</label>
+    <label class="row"><input type="checkbox" id="dollhouse" checked> see through walls facing the camera</label>
+    <div class="sub">Cut-away height <span id="cutVal"></span></div>
+    <input type="range" id="cut" min="0.3" max="1" step="0.01" value="0.82">
+
+    <h2>Layout</h2>
+    <div class="btns3">
+      <button id="loadLayout">Load layout</button>
+      <button id="exportGlb">Export GLB</button>
+      <button id="resetAll">Reset all</button>
+    </div>
+    <input type="file" id="layoutFile" accept=".json" hidden>
+    <p class="sub"><span id="serverNote"></span> Bake into one mesh with
+      <code>python -m avegeany apply-layout ROOM.avjp</code></p>
+  </aside>
+</div>
+<div id="modal" hidden><div id="modalBox"></div></div>
+<input type="file" id="avjpFile" accept=".avjp" hidden>
+<input type="file" id="scanFile" accept=".obj,.mtl,.jpg,.jpeg,.png,.ply,.glb,.gltf,.stl,.off" multiple hidden>
+<script type="module" src="./app.js"></script>
+</body>
+</html>

@@ -28,5 +28,6 @@ export const ArrowLeft = (p) => <Svg {...p}><path d="M19 12H5M11 6l-6 6 6 6" /><
 export const ChatIcon = (p) => <Svg {...p}><path d="M4 12a8 8 0 1 1 3.5 6.6L4 20l1.3-3.6A8 8 0 0 1 4 12Z" /></Svg>;
 export const FilterIcon = (p) => <Svg {...p}><path d="M4 5h16l-6 7.5V19l-4 1v-7.5L4 5Z" /></Svg>;
 export const ChevronUp = (p) => <Svg size={16} {...p}><path d="m6 15 6-6 6 6" /></Svg>;
-export const CheckCircle = (p) => <Svg {...p}><circle cx="12" cy="12" r="9" /><path d="m8 12.5 2.8 2.8L16 10" /></Svg>;
+export const CubeIcon = (p) => <Svg {...p}><path d="M12 3 4 7.5v9L12 21l8-4.5v-9L12 3Z" /><path d="M4 7.5 12 12l8-4.5M12 12v9" /></Svg>;
+export const CheckCircle =(p) => <Svg {...p}><circle cx="12" cy="12" r="9" /><path d="m8 12.5 2.8 2.8L16 10" /></Svg>;
 export const QuoteIcon = (p) => <Svg {...p} fill="currentColor" stroke="none"><path d="M4 18v-5.5C4 8.4 6 6 9.5 5l.7 1.6C8 7.5 7.2 9 7.2 11H10v7H4Zm10 0v-5.5c0-4.1 2-6.5 5.5-7.5l.7 1.6C18 7.5 17.2 9 17.2 11H20v7h-6Z" /></Svg>;
